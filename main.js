@@ -15,7 +15,7 @@ const blogInput = document.querySelector('#blog');
 const blogCancelBtn = document.querySelector('#cancelBtn');
 
 // --- State Variables ---
-const API_URL = 'https://my-boilerplate-production.up.railway.app';
+const API_URL = 'https://my-boilerplate-production-a079.up.railway.app';
 const telegramWebApp = window.Telegram?.WebApp;
 const miniAppInitData = telegramWebApp?.initData || '';
 let isLoggedIn = Boolean(miniAppInitData);
