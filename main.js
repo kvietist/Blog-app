@@ -5,18 +5,7 @@ const writeBtn = document.querySelector('#write-BTN');
 const seeBtn = document.querySelector('#seeBtn');
 const postDiv = document.querySelector('#posts');
 const backBtn = document.querySelector('#go-back');
-
-// Auth Screens & Elements
-const authWind = document.querySelector('.Auth-wind');
-const authFormContainer = document.querySelector('.auth-form');
-const authForm = document.querySelector('#id-form');
-const loginTab = document.querySelector('#login');
-const registerTab = document.querySelector('#register');
-
-// Auth Inputs & Buttons
-const confirmPassGroup = document.querySelectorAll('.auth-form .input-group')[2]; // 3rd input group
-const authSubmitBtn = document.querySelector('.auth-form button[type="submit"]');
-const authCancelBtn = document.querySelector('.auth-form button[type="button"]');
+const homeStatus = document.querySelector('#home-status');
 
 // Blog Form Elements
 const blogFormContainer = document.querySelector('.form');
@@ -30,7 +19,6 @@ const API_URL = 'https://my-boilerplate-production.up.railway.app';
 const telegramWebApp = window.Telegram?.WebApp;
 const miniAppInitData = telegramWebApp?.initData || '';
 let isLoggedIn = Boolean(miniAppInitData);
-let isRegisterMode = false;
 const postsStatus = document.querySelector('#posts-status');
 
 // --- Utility Functions ---
@@ -38,10 +26,12 @@ const postsStatus = document.querySelector('#posts-status');
 // Hides all views to avoid layout overlap
 function hideAllViews() {
   containerOne.classList.add('hidden');
-  authWind.classList.add('hidden');
-  authFormContainer.classList.add('hidden');
   blogFormContainer.classList.add('hidden');
   postDiv.classList.add('hidden');
+}
+
+if (!isLoggedIn) {
+  homeStatus.textContent = 'Open this page inside Telegram to connect your account.';
 }
 
 function apiHeaders() {
@@ -112,49 +102,16 @@ async function deletePost(id) {
 telegramWebApp?.ready();
 telegramWebApp?.expand();
 
-// --- Auth Tab Switching Logic ---
-
-loginTab.addEventListener('click', () => {
-  isRegisterMode = false;
-  loginTab.classList.add('active');
-  registerTab.classList.remove('active');
-  confirmPassGroup.classList.add('hidden');
-  authSubmitBtn.textContent = 'Sign in';
-});
-
-registerTab.addEventListener('click', () => {
-  isRegisterMode = true;
-  registerTab.classList.add('active');
-  loginTab.classList.remove('active');
-  confirmPassGroup.classList.remove('hidden');
-  authSubmitBtn.textContent = 'Register Account';
-});
-
 // --- Main Navigation Listeners ---
 
 // "Write New Blog" Click
 writeBtn.addEventListener('click', () => {
-  hideAllViews();
   if (!isLoggedIn) {
-    // Prompt auth windows if user isn't logged in
-    authWind.classList.remove('hidden');
-    authFormContainer.classList.remove('hidden');
-  } else {
-    // Open blog creation form directly
-    blogFormContainer.classList.remove('hidden');
+    homeStatus.textContent = 'Open this page inside Telegram to create diary entries.';
+    return;
   }
-});
-
-// Auth Form Submission is unnecessary inside a Telegram Mini App.
-authForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  alert('Authentication is handled by Telegram Mini App.');
-});
-
-// Auth Cancel Button
-authCancelBtn.addEventListener('click', () => {
   hideAllViews();
-  containerOne.classList.remove('hidden');
+  blogFormContainer.classList.remove('hidden');
 });
 
 // Blog Form Submission (Creating a Post)

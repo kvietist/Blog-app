@@ -12,42 +12,12 @@
         <p class="eyebrow">LIFETRACKER</p>
         <h1>Daily thoughts, kept close.</h1>
         <p>Write a diary entry and keep it safely connected to your Telegram account.</p>
+        <p id="home-status" class="status" aria-live="polite"></p>
         <div class="buttons">
             <button id="seeBtn" type="button">See diaries</button>
             <button id="write-BTN" type="button">New diary</button>
         </div>
     </main>
-
-    <div class="Auth-wind hidden">
-        <div class="auth-container">
-            <button id="login" class="tab-btn">login</button>
-            <button id="register" class="tab-btn">register</button>
-        </div>
-    </div>
-
-    <div class="auth-form hidden">
-        <form id="id-form">
-               <div class="input-group">
-                     <label for="Authemail">Email or Username</label>
-                     <input type="text" id="Authemail"  placeholder="e.g. mr_x" required>
-               </div>
-
-               <div class="input-group">
-                    <label for="Authpassword">Password</label>
-                    <input type="password" id="Authpassword" placeholder="......" required>  
-               </div>
-
-               <div class="input-group hidden">
-                    <label for="AuthConfirmPassword">Confirm Password</label>
-                    <input type="password" id="AuthConfirmPassword" placeholder="......">
-               </div>
-
-               <div class="btn-group">
-                  <button type="submit">Sign in</button>
-                  <button type="button"> cancel</button>
-               </div>
-        </form>
-    </div>
 
     <section id="posts" class="hidden" aria-live="polite">
         <div class="section-heading">
