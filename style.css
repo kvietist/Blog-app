@@ -73,6 +73,15 @@ body {
     flex: 1 1 10rem;
 }
 
+.form .btn-group {
+    justify-content: flex-end;
+}
+
+.form .btn-group button {
+    flex: 0 1 auto;
+    min-width: 7rem;
+}
+
 .buttons {
     justify-content: center;
 }
@@ -245,12 +254,20 @@ button:hover {
         flex-direction: column;
     }
 
-    .btn-group button,
     .secondary-button {
         width: 100%;
     }
 
     .buttons button {
+        width: auto;
+    }
+
+    .form .btn-group {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .form .btn-group button {
         width: auto;
     }
 
