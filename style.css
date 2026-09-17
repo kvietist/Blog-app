@@ -217,7 +217,8 @@ button:hover {
 
 @media (max-width: 480px) {
     body {
-        align-items: flex-start;
+        align-items: center;
+        overflow-y: auto;
         padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(0.75rem, env(safe-area-inset-bottom));
     }
 
