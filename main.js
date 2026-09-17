@@ -136,7 +136,10 @@ blogForm.addEventListener('submit', (e) => {
     headers: apiHeaders(),
     body: JSON.stringify({ title: titleValue, content: blogValue }),
   }).then(async (response) => {
-    if (!response.ok) throw new Error('The diary entry could not be saved.');
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`Save failed (${response.status}): ${detail || 'backend rejected the request.'}`);
+    }
     blogForm.reset();
     hideAllViews();
     containerOne.classList.remove('hidden');
