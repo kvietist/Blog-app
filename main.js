@@ -26,8 +26,12 @@ const blogInput = document.querySelector('#blog');
 const blogCancelBtn = document.querySelector('#cancelBtn');
 
 // --- State Variables ---
-let isLoggedIn = false;
+const API_URL = 'https://my-boilerplate-production.up.railway.app';
+const telegramWebApp = window.Telegram?.WebApp;
+const miniAppInitData = telegramWebApp?.initData || '';
+let isLoggedIn = Boolean(miniAppInitData);
 let isRegisterMode = false;
+const postsStatus = document.querySelector('#posts-status');
 
 // --- Utility Functions ---
 
@@ -40,32 +44,73 @@ function hideAllViews() {
   postDiv.classList.add('hidden');
 }
 
+function apiHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `TelegramMiniApp ${miniAppInitData}`,
+  };
+}
+
 // Renders a single post card inside #posts
-function createPostElement(title, content) {
+function createPostElement(id, title, content) {
   const newPost = document.createElement('article');
   newPost.className = 'post-card';
-  newPost.innerHTML = `
-    <h2>${title}</h2>
-    <p>${content}</p>
-  `;
+  const titleElement = document.createElement('h2');
+  const contentElement = document.createElement('p');
+  const deleteButton = document.createElement('button');
+  titleElement.textContent = title;
+  contentElement.textContent = content;
+  deleteButton.type = 'button';
+  deleteButton.textContent = 'Delete';
+  deleteButton.dataset.diaryId = id;
+  deleteButton.addEventListener('click', () => deletePost(id));
+  newPost.append(titleElement, contentElement, deleteButton);
   postDiv.appendChild(newPost);
 }
 
-// Saves post array to browser memory
-function savePostToStorage(title, content) {
-  const storedPosts = JSON.parse(localStorage.getItem('my_blogs') || '[]');
-  storedPosts.push({ title, content });
-  localStorage.setItem('my_blogs', JSON.stringify(storedPosts));
+async function loadPosts() {
+  if (!miniAppInitData) {
+    postsStatus.textContent = 'Open this page inside Telegram to load your diaries.';
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/miniapp/diaries/`, {
+      headers: apiHeaders(),
+    });
+    if (!response.ok) throw new Error('Unable to load diaries.');
+
+    postDiv.querySelectorAll('.post-card').forEach((post) => post.remove());
+    const diaries = await response.json();
+    if (!diaries.length) {
+      postsStatus.textContent = 'No diary entries yet.';
+      return;
+    }
+    postsStatus.textContent = '';
+    diaries.forEach((diary) => createPostElement(diary.id, diary.title, diary.content));
+  } catch (error) {
+    postsStatus.textContent = error.message;
+  }
 }
 
-// Loads posts from localStorage on refresh
-function loadPosts() {
-  const storedPosts = JSON.parse(localStorage.getItem('my_blogs') || '[]');
-  storedPosts.forEach(post => createPostElement(post.title, post.content));
+async function deletePost(id) {
+  if (!confirm('Delete this diary entry?')) return;
+
+  try {
+    const response = await fetch(`${API_URL}/miniapp/diaries/${id}`, {
+      method: 'DELETE',
+      headers: apiHeaders(),
+    });
+    if (!response.ok) throw new Error('The diary entry could not be deleted.');
+    await loadPosts();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-// Initial Load
-loadPosts();
+// Initial Mini App setup
+telegramWebApp?.ready();
+telegramWebApp?.expand();
 
 // --- Auth Tab Switching Logic ---
 
@@ -100,17 +145,10 @@ writeBtn.addEventListener('click', () => {
   }
 });
 
-// Auth Form Submission (Simulating Login / Register)
+// Auth Form Submission is unnecessary inside a Telegram Mini App.
 authForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  
-  // Set user as authenticated
-  isLoggedIn = true;
-  authForm.reset();
-
-  // Redirect directly to the blog writing form
-  hideAllViews();
-  blogFormContainer.classList.remove('hidden');
+  alert('Authentication is handled by Telegram Mini App.');
 });
 
 // Auth Cancel Button
@@ -131,14 +169,23 @@ blogForm.addEventListener('submit', (e) => {
     return;
   }
 
-  // Create & persist the post
-  createPostElement(titleValue, blogValue);
-  savePostToStorage(titleValue, blogValue);
+  if (!miniAppInitData) {
+    alert('Open this page inside Telegram to save diary entries.');
+    return;
+  }
 
-  // Reset form & return home
-  blogForm.reset();
-  hideAllViews();
-  containerOne.classList.remove('hidden');
+  fetch(`${API_URL}/miniapp/diaries/`, {
+    method: 'POST',
+    headers: apiHeaders(),
+    body: JSON.stringify({ title: titleValue, content: blogValue }),
+  }).then(async (response) => {
+    if (!response.ok) throw new Error('The diary entry could not be saved.');
+    blogForm.reset();
+    hideAllViews();
+    containerOne.classList.remove('hidden');
+    await loadPosts();
+  }).catch((error) => alert(error.message));
+
 });
 
 // Blog Form Cancel Button
@@ -151,6 +198,7 @@ blogCancelBtn.addEventListener('click', () => {
 seeBtn.addEventListener('click', () => {
   hideAllViews();
   postDiv.classList.remove('hidden');
+  loadPosts();
 });
 
 // "Go Back" Click
